@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Company;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -20,5 +21,10 @@ class CompanyFactory extends Factory
         return [
             'name' => fake()->company(),
         ];
+    }
+
+    public function withAdministrator(): static
+    {
+        return $this->has(User::factory(), 'administrator');
     }
 }
