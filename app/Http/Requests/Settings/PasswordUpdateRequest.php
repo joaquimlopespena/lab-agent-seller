@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Settings;
 
 use App\Concerns\PasswordValidationRules;
+use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -21,5 +22,12 @@ class PasswordUpdateRequest extends FormRequest
             'current_password' => $this->currentPasswordRules(),
             'password' => $this->passwordRules(),
         ];
+    }
+
+    public function user($guard = null): User
+    {
+        $user = parent::user($guard);
+
+        return $user instanceof User ? $user : abort(401);
     }
 }

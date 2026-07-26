@@ -20,31 +20,37 @@ class PipedriveDeal extends PipedriveModel
         return ['value' => 'decimal:2', 'raw_payload' => 'array', 'synced_at' => 'datetime'];
     }
 
+    /** @return BelongsTo<PipedrivePipeline, $this> */
     public function pipeline(): BelongsTo
     {
         return $this->belongsTo(PipedrivePipeline::class, 'pipedrive_pipeline_id');
     }
 
+    /** @return BelongsTo<PipedriveStage, $this> */
     public function stage(): BelongsTo
     {
         return $this->belongsTo(PipedriveStage::class, 'pipedrive_stage_id');
     }
 
+    /** @return BelongsTo<PipedrivePerson, $this> */
     public function person(): BelongsTo
     {
         return $this->belongsTo(PipedrivePerson::class, 'pipedrive_person_id');
     }
 
+    /** @return BelongsTo<PipedriveOrganization, $this> */
     public function organization(): BelongsTo
     {
         return $this->belongsTo(PipedriveOrganization::class, 'pipedrive_organization_id');
     }
 
+    /** @return BelongsTo<PipedriveUser, $this> */
     public function owner(): BelongsTo
     {
         return $this->belongsTo(PipedriveUser::class, 'owner_pipedrive_user_id');
     }
 
+    /** @return BelongsToMany<PipedriveProduct, $this, PipedriveDealProduct, 'pivot'> */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(PipedriveProduct::class, 'pipedrive_deal_products')
@@ -53,11 +59,13 @@ class PipedriveDeal extends PipedriveModel
             ->withTimestamps();
     }
 
+    /** @return HasMany<PipedriveActivity, $this> */
     public function activities(): HasMany
     {
         return $this->hasMany(PipedriveActivity::class);
     }
 
+    /** @return list<string> */
     protected function tenantRelationships(): array
     {
         return [...parent::tenantRelationships(), 'pipeline', 'stage', 'person', 'organization', 'owner'];

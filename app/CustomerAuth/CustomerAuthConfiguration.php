@@ -10,6 +10,7 @@ final class CustomerAuthConfiguration
 
     public readonly int $sessionTtlHours;
 
+    /** @var non-empty-string */
     public readonly string $cookieName;
 
     public readonly bool $cookieSecure;

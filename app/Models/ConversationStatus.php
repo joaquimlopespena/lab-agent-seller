@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $name
+ * @property string $slug
+ * @property bool $is_active
+ */
 #[Fillable(['name', 'slug', 'description', 'is_active'])]
 class ConversationStatus extends Model
 {
@@ -21,6 +26,7 @@ class ConversationStatus extends Model
         return ['is_active' => 'boolean'];
     }
 
+    /** @return HasMany<AgentConversation, $this> */
     public function conversations(): HasMany
     {
         return $this->hasMany(AgentConversation::class, 'status_id');

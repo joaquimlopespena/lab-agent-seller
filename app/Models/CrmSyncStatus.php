@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ */
 #[Fillable(['name', 'slug', 'description', 'is_active'])]
 class CrmSyncStatus extends Model
 {
@@ -27,6 +32,7 @@ class CrmSyncStatus extends Model
         return ['is_active' => 'boolean'];
     }
 
+    /** @return HasMany<CrmSyncRun, $this> */
     public function syncRuns(): HasMany
     {
         return $this->hasMany(CrmSyncRun::class, 'status_id');

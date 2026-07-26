@@ -3,10 +3,17 @@
 namespace Database\Factories;
 
 use App\Models\CrmConnection;
+use App\Models\PipedriveModel;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
+/**
+ * @template TModel of PipedriveModel
+ *
+ * @extends Factory<TModel>
+ */
 abstract class PipedriveFactory extends Factory
 {
+    /** @param array<string, mixed> $attributes */
     protected function connectionFor(array $attributes): CrmConnection
     {
         return CrmConnection::factory()->create(['company_id' => $attributes['company_id']]);

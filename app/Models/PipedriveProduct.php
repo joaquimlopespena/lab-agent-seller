@@ -23,6 +23,7 @@ class PipedriveProduct extends PipedriveModel
         ];
     }
 
+    /** @return BelongsToMany<PipedriveDeal, $this, PipedriveDealProduct, 'pivot'> */
     public function deals(): BelongsToMany
     {
         return $this->belongsToMany(PipedriveDeal::class, 'pipedrive_deal_products')

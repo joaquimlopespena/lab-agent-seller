@@ -39,11 +39,13 @@ class PipedriveDealProduct extends Pivot
         ];
     }
 
+    /** @return BelongsTo<PipedriveDeal, $this> */
     public function deal(): BelongsTo
     {
         return $this->belongsTo(PipedriveDeal::class, 'pipedrive_deal_id');
     }
 
+    /** @return BelongsTo<PipedriveProduct, $this> */
     public function product(): BelongsTo
     {
         return $this->belongsTo(PipedriveProduct::class, 'pipedrive_product_id');

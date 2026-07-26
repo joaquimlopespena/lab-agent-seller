@@ -12,6 +12,7 @@ class SelectCustomerCompanyRequest extends FormRequest
         return $this->attributes->get('customerSession') instanceof CustomerSession;
     }
 
+    /** @return array<string, list<string>> */
     public function rules(): array
     {
         return [
@@ -19,6 +20,7 @@ class SelectCustomerCompanyRequest extends FormRequest
         ];
     }
 
+    /** @return array<string, string> */
     public function messages(): array
     {
         return [

@@ -19,26 +19,31 @@ class PipedriveOrganization extends PipedriveModel
         return ['is_active' => 'boolean', 'raw_payload' => 'array', 'synced_at' => 'datetime'];
     }
 
+    /** @return BelongsTo<PipedriveUser, $this> */
     public function owner(): BelongsTo
     {
         return $this->belongsTo(PipedriveUser::class, 'owner_pipedrive_user_id');
     }
 
+    /** @return HasMany<PipedrivePerson, $this> */
     public function people(): HasMany
     {
         return $this->hasMany(PipedrivePerson::class);
     }
 
+    /** @return HasMany<PipedriveDeal, $this> */
     public function deals(): HasMany
     {
         return $this->hasMany(PipedriveDeal::class);
     }
 
+    /** @return HasMany<PipedriveActivity, $this> */
     public function activities(): HasMany
     {
         return $this->hasMany(PipedriveActivity::class);
     }
 
+    /** @return list<string> */
     protected function tenantRelationships(): array
     {
         return [...parent::tenantRelationships(), 'owner'];

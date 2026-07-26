@@ -21,21 +21,25 @@ class PipedrivePersonEmail extends Model
         return ['is_primary' => 'boolean'];
     }
 
+    /** @return BelongsTo<Company, $this> */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /** @return BelongsTo<PipedrivePerson, $this> */
     public function person(): BelongsTo
     {
         return $this->belongsTo(PipedrivePerson::class, 'pipedrive_person_id');
     }
 
+    /** @return HasMany<CompanyCustomer, $this> */
     public function companyCustomers(): HasMany
     {
         return $this->hasMany(CompanyCustomer::class);
     }
 
+    /** @return list<string> */
     protected function tenantRelationships(): array
     {
         return ['person'];

@@ -19,16 +19,19 @@ class PipedriveStage extends PipedriveModel
         return ['is_active' => 'boolean', 'raw_payload' => 'array', 'synced_at' => 'datetime'];
     }
 
+    /** @return BelongsTo<PipedrivePipeline, $this> */
     public function pipeline(): BelongsTo
     {
         return $this->belongsTo(PipedrivePipeline::class, 'pipedrive_pipeline_id');
     }
 
+    /** @return HasMany<PipedriveDeal, $this> */
     public function deals(): HasMany
     {
         return $this->hasMany(PipedriveDeal::class);
     }
 
+    /** @return list<string> */
     protected function tenantRelationships(): array
     {
         return [...parent::tenantRelationships(), 'pipeline'];

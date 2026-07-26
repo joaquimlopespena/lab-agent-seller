@@ -4,15 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CrmConnectionStatus;
+use App\Tenancy\TenantContext;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 final class PipedriveConnectionController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request, TenantContext $tenantContext): Response
     {
-        $connection = $request->user()->company->crmConnection()
+        $connection = $tenantContext->company()->crmConnection()
             ->with([
                 'status:id,name,slug',
                 'syncRuns' => fn ($query) => $query

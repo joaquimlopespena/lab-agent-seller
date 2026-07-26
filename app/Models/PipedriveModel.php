@@ -10,16 +10,19 @@ abstract class PipedriveModel extends Model
 {
     use BelongsToCompany;
 
+    /** @return BelongsTo<Company, $this> */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /** @return BelongsTo<CrmConnection, $this> */
     public function crmConnection(): BelongsTo
     {
         return $this->belongsTo(CrmConnection::class);
     }
 
+    /** @return list<string> */
     protected function tenantRelationships(): array
     {
         return ['crmConnection'];

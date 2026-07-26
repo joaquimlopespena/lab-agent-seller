@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $slug
+ */
 #[Fillable(['name', 'slug', 'description', 'is_active'])]
 class MessageRole extends Model
 {
@@ -25,6 +30,7 @@ class MessageRole extends Model
         return ['is_active' => 'boolean'];
     }
 
+    /** @return HasMany<AgentConversationMessage, $this> */
     public function messages(): HasMany
     {
         return $this->hasMany(AgentConversationMessage::class, 'message_role_id');

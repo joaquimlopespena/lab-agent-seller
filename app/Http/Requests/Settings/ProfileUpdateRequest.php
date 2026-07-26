@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Settings;
 
 use App\Concerns\ProfileValidationRules;
+use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -18,5 +19,12 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return $this->profileRules($this->user()->id);
+    }
+
+    public function user($guard = null): User
+    {
+        $user = parent::user($guard);
+
+        return $user instanceof User ? $user : abort(401);
     }
 }

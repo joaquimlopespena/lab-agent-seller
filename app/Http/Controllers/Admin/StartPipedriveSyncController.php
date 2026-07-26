@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\PipedriveSynchronizationService;
+use App\Tenancy\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,9 +14,9 @@ final class StartPipedriveSyncController extends Controller
 {
     public function __construct(private PipedriveSynchronizationService $synchronization) {}
 
-    public function __invoke(Request $request): JsonResponse|RedirectResponse
+    public function __invoke(Request $request, TenantContext $tenantContext): JsonResponse|RedirectResponse
     {
-        $company = $request->user()->company;
+        $company = $tenantContext->company();
         $connection = $company->crmConnection()->firstOrFail();
         try {
             $run = $this->synchronization->synchronize($company, $connection);

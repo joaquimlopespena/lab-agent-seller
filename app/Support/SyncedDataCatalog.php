@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\PipedriveActivity;
 use App\Models\PipedriveCustomField;
 use App\Models\PipedriveDeal;
+use App\Models\PipedriveModel;
 use App\Models\PipedriveOrganization;
 use App\Models\PipedrivePerson;
 use App\Models\PipedrivePipeline;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 class SyncedDataCatalog
 {
     /**
-     * @return array<string, array{label: string, description: string, model: class-string<Model>, search: list<string>, relations: list<string>}>
+     * @return array<string, array{label: string, description: string, model: class-string<PipedriveModel>, search: list<string>, relations: list<string>}>
      */
     public function categories(): array
     {
@@ -36,7 +37,7 @@ class SyncedDataCatalog
     }
 
     /**
-     * @return array{label: string, description: string, model: class-string<Model>, search: list<string>, relations: list<string>}
+     * @return array{label: string, description: string, model: class-string<PipedriveModel>, search: list<string>, relations: list<string>}
      */
     public function category(string $category): array
     {
@@ -44,7 +45,7 @@ class SyncedDataCatalog
     }
 
     /**
-     * @param  Builder<Model>  $query
+     * @param  Builder<PipedriveModel>  $query
      * @param  list<string>  $columns
      */
     public function applySearch(Builder $query, string $search, array $columns): void
@@ -63,7 +64,7 @@ class SyncedDataCatalog
     /**
      * @return array<string, mixed>
      */
-    public function summary(Model $record, string $category): array
+    public function summary(PipedriveModel $record, string $category): array
     {
         return array_filter([
             'id' => $record->getKey(),
@@ -78,7 +79,7 @@ class SyncedDataCatalog
     /**
      * @return array<string, mixed>
      */
-    public function detail(Model $record, string $category): array
+    public function detail(PipedriveModel $record, string $category): array
     {
         return [
             ...$this->summary($record, $category),
@@ -87,7 +88,7 @@ class SyncedDataCatalog
         ];
     }
 
-    private function title(Model $record): string
+    private function title(PipedriveModel $record): string
     {
         return (string) ($record->getAttribute('name')
             ?? $record->getAttribute('title')
@@ -95,7 +96,7 @@ class SyncedDataCatalog
             ?? $record->getAttribute('pipedrive_key'));
     }
 
-    private function subtitle(Model $record, string $category): ?string
+    private function subtitle(PipedriveModel $record, string $category): ?string
     {
         return match ($category) {
             'custom-fields' => implode(' · ', array_filter([$record->getAttribute('entity_type'), $record->getAttribute('field_type')])),
@@ -112,7 +113,7 @@ class SyncedDataCatalog
     /**
      * @return array<string, scalar|null>
      */
-    private function fields(Model $record, string $category): array
+    private function fields(PipedriveModel $record, string $category): array
     {
         $columns = match ($category) {
             'pipelines', 'stages' => ['display_order', 'is_active', 'synced_at'],
@@ -136,7 +137,7 @@ class SyncedDataCatalog
     /**
      * @return array<string, mixed>
      */
-    private function relations(Model $record, string $category): array
+    private function relations(PipedriveModel $record, string $category): array
     {
         $names = match ($category) {
             'pipelines' => ['stages'],

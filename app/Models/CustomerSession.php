@@ -9,7 +9,12 @@ use Illuminate\Database\Eloquent\Attributes\WithoutIncrementing;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property Carbon $expires_at
+ * @property Carbon|null $revoked_at
+ */
 #[WithoutIncrementing]
 #[Fillable(['id', 'customer_identity_id', 'active_company_id', 'token_hash', 'ip_address', 'user_agent', 'expires_at', 'last_activity_at', 'revoked_at'])]
 #[Hidden(['token_hash'])]
@@ -29,11 +34,13 @@ class CustomerSession extends Model
         ];
     }
 
+    /** @return BelongsTo<CustomerIdentity, $this> */
     public function customerIdentity(): BelongsTo
     {
         return $this->belongsTo(CustomerIdentity::class);
     }
 
+    /** @return BelongsTo<Company, $this> */
     public function activeCompany(): BelongsTo
     {
         return $this->belongsTo(Company::class, 'active_company_id');

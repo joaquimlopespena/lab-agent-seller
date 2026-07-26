@@ -11,6 +11,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $id
+ * @property int $company_id
+ * @property int $customer_identity_id
+ * @property int $pipedrive_person_id
+ * @property int $pipedrive_person_email_id
+ * @property-read CustomerIdentity $customerIdentity
+ * @property-read PipedrivePerson $pipedrivePerson
+ */
 #[Fillable(['company_id', 'customer_identity_id', 'pipedrive_person_id', 'pipedrive_person_email_id'])]
 class CompanyCustomer extends Model
 {
@@ -28,31 +37,37 @@ class CompanyCustomer extends Model
         });
     }
 
+    /** @return BelongsTo<Company, $this> */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /** @return BelongsTo<CustomerIdentity, $this> */
     public function customerIdentity(): BelongsTo
     {
         return $this->belongsTo(CustomerIdentity::class);
     }
 
+    /** @return BelongsTo<PipedrivePerson, $this> */
     public function pipedrivePerson(): BelongsTo
     {
         return $this->belongsTo(PipedrivePerson::class);
     }
 
+    /** @return BelongsTo<PipedrivePersonEmail, $this> */
     public function pipedrivePersonEmail(): BelongsTo
     {
         return $this->belongsTo(PipedrivePersonEmail::class);
     }
 
+    /** @return HasOne<AgentConversation, $this> */
     public function conversation(): HasOne
     {
         return $this->hasOne(AgentConversation::class);
     }
 
+    /** @return list<string> */
     protected function tenantRelationships(): array
     {
         return ['pipedrivePerson', 'pipedrivePersonEmail'];

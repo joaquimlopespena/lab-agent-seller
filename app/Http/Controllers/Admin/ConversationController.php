@@ -67,7 +67,7 @@ class ConversationController extends Controller
                 'companyCustomer:id,company_id,customer_identity_id,pipedrive_person_id',
                 'companyCustomer.customerIdentity:id,email',
                 'companyCustomer.pipedrivePerson:id,company_id,name',
-                'messages' => fn ($query) => $query
+                'agentMessages' => fn ($query) => $query
                     ->select(['id', 'conversation_id', 'company_id', 'message_role_id', 'content', 'created_at', 'updated_at'])
                     ->with('messageRole:id,name,slug')
                     ->oldest('created_at')
@@ -78,7 +78,7 @@ class ConversationController extends Controller
         return Inertia::render('admin/conversations/show', [
             'conversation' => [
                 ...$this->conversationSummary($conversationModel),
-                'messages' => $conversationModel->messages->map(fn (AgentConversationMessage $message): array => [
+                'messages' => $conversationModel->agentMessages->map(fn (AgentConversationMessage $message): array => [
                     'id' => $message->id,
                     'role' => $message->messageRole->slug,
                     'role_label' => $message->messageRole->name,

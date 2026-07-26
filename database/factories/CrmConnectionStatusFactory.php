@@ -11,7 +11,7 @@ class CrmConnectionStatusFactory extends Factory
 {
     public function definition(): array
     {
-        $name = fake()->unique()->words(2, true);
+        $name = fake()->unique()->word().' '.fake()->word();
 
         return ['name' => Str::headline($name), 'slug' => Str::slug($name), 'description' => fake()->sentence(), 'is_active' => true];
     }

@@ -3,6 +3,7 @@
 namespace App\Models\Concerns;
 
 use App\Models\Company;
+use App\Models\User;
 use App\Tenancy\TenantContext;
 use DomainException;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,7 +14,7 @@ trait BelongsToCompany
 {
     protected static function bootBelongsToCompany(): void
     {
-        static::saving(function (Model $model): void {
+        static::saving(function (self $model): void {
             foreach ($model->tenantRelationships() as $relationship) {
                 $foreignKey = $model->{$relationship}()->getForeignKeyName();
                 $relatedId = $model->getAttribute($foreignKey);
@@ -53,8 +54,10 @@ trait BelongsToCompany
     {
         $tenantContext = app(TenantContext::class);
 
-        if ($tenantContext->current() === null && request()->user() !== null) {
-            $tenantContext->setForUser(request()->user());
+        $user = request()->user();
+
+        if ($tenantContext->current() === null && $user instanceof User) {
+            $tenantContext->setForUser($user);
         }
 
         return parent::resolveRouteBindingQuery($query, $value, $field)

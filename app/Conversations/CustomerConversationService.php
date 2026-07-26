@@ -87,14 +87,20 @@ final class CustomerConversationService
         AgentConversation $conversation,
         AgentConversationMessage $userMessage,
     ): AgentConversationMessage {
-        $history = $this->orderedMessages($conversation)
-            ->takeUntil(fn (AgentConversationMessage $message): bool => $message->is($userMessage))
-            ->map(fn (AgentConversationMessage $message): array => [
-                'role' => $message->role,
+        $history = [];
+
+        foreach ($this->orderedMessages($conversation) as $message) {
+            if ($message->is($userMessage)) {
+                break;
+            }
+
+            $history[] = [
+                'role' => $message->role === MessageRole::Assistant
+                    ? MessageRole::Assistant
+                    : MessageRole::User,
                 'content' => $message->content,
-            ])
-            ->values()
-            ->all();
+            ];
+        }
 
         try {
             $reply = $this->replyGenerator->generate(new AgentReplyRequest(
@@ -147,7 +153,7 @@ final class CustomerConversationService
      */
     private function orderedMessages(AgentConversation $conversation): Collection
     {
-        return $conversation->messages()
+        return $conversation->agentMessages()
             ->orderBy('created_at')
             ->orderBy('id')
             ->get();

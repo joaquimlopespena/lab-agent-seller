@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use App\Tenancy\TenantContext;
 use Closure;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class ResolveAuthenticatedTenant
     {
         $user = $request->user();
 
-        if ($user === null) {
+        if (! $user instanceof User) {
             $this->tenantContext->forget();
 
             return $next($request);

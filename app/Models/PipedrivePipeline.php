@@ -18,11 +18,13 @@ class PipedrivePipeline extends PipedriveModel
         return ['is_active' => 'boolean', 'raw_payload' => 'array', 'synced_at' => 'datetime'];
     }
 
+    /** @return HasMany<PipedriveStage, $this> */
     public function stages(): HasMany
     {
         return $this->hasMany(PipedriveStage::class);
     }
 
+    /** @return HasMany<PipedriveDeal, $this> */
     public function deals(): HasMany
     {
         return $this->hasMany(PipedriveDeal::class);

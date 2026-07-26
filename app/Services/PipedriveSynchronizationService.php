@@ -34,11 +34,39 @@ final class PipedriveSynchronizationService
 
     public function synchronize(Company $company, CrmConnection $connection): CrmSyncRun
     {
-        $run = DB::transaction(function () use ($company, $connection): CrmSyncRun {
+        $run = $this->startRun($company, $connection);
+
+        try {
+            $this->syncStructure($connection);
+            $this->syncContacts($connection);
+            $this->syncSales($connection);
+            $this->projectCustomers($connection);
+
+            $run->update([
+                'status_id' => $this->statusId(CrmSyncStatus::Succeeded),
+                'finished_at' => now(),
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+
+            $run->update([
+                'status_id' => $this->statusId(CrmSyncStatus::Failed),
+                'finished_at' => now(),
+                'error_message' => 'Não foi possível concluir a sincronização. Tente novamente.',
+            ]);
+        }
+
+        return $run->fresh('status:id,name,slug');
+    }
+
+    private function startRun(Company $company, CrmConnection $connection): CrmSyncRun
+    {
+        return DB::transaction(function () use ($company, $connection): CrmSyncRun {
             $lockedConnection = CrmConnection::query()
                 ->with('status:id,slug')
+                ->whereKey($connection->getKey())
                 ->lockForUpdate()
-                ->findOrFail($connection->getKey());
+                ->firstOrFail();
 
             if ((int) $lockedConnection->company_id !== (int) $company->getKey()) {
                 throw new AuthorizationException;
@@ -68,28 +96,6 @@ final class PipedriveSynchronizationService
 
             return $run;
         });
-
-        try {
-            $this->syncStructure($connection);
-            $this->syncContacts($connection);
-            $this->syncSales($connection);
-            $this->projectCustomers($connection);
-
-            $run->update([
-                'status_id' => $this->statusId(CrmSyncStatus::Succeeded),
-                'finished_at' => now(),
-            ]);
-        } catch (Throwable $exception) {
-            report($exception);
-
-            $run->update([
-                'status_id' => $this->statusId(CrmSyncStatus::Failed),
-                'finished_at' => now(),
-                'error_message' => 'Não foi possível concluir a sincronização. Tente novamente.',
-            ]);
-        }
-
-        return $run->fresh('status:id,name,slug');
     }
 
     private function syncStructure(CrmConnection $connection): void
