@@ -35,4 +35,19 @@ return [
         ],
     ],
 
+    'pipedrive' => [
+        'client_id' => env('PIPEDRIVE_CLIENT_ID'),
+        'client_secret' => env('PIPEDRIVE_CLIENT_SECRET'),
+        'redirect_uri' => env('PIPEDRIVE_REDIRECT_URI'),
+        'scopes' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('PIPEDRIVE_SCOPES', 'deals:read,persons:read,organizations:read,activities:read,users:read,products:read')),
+        ))),
+        'authorization_endpoint' => env('PIPEDRIVE_AUTHORIZATION_ENDPOINT', 'https://oauth.pipedrive.com/oauth/authorize'),
+        'token_endpoint' => env('PIPEDRIVE_TOKEN_ENDPOINT', 'https://oauth.pipedrive.com/oauth/token'),
+        'state_ttl_minutes' => (int) env('PIPEDRIVE_STATE_TTL_MINUTES', 10),
+        'timeout_seconds' => (int) env('PIPEDRIVE_TIMEOUT_SECONDS', 10),
+        'connect_timeout_seconds' => (int) env('PIPEDRIVE_CONNECT_TIMEOUT_SECONDS', 3),
+    ],
+
 ];

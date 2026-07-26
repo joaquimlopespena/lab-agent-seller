@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\PipedriveConnectionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PipedriveOAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::inertia('/', 'welcome')->name('home');
@@ -18,13 +20,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', DashboardController::class)->name('dashboard');
 
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::inertia('integrations', 'admin/integrations/index')
+        Route::get('integrations', PipedriveConnectionController::class)
             ->name('integrations.index');
         Route::inertia('synced-data', 'admin/synced-data/index')
             ->name('synced-data.index');
         Route::inertia('conversations', 'admin/conversations/index')
             ->name('conversations.index');
     });
+
+    Route::get('oauth/pipedrive', [PipedriveOAuthController::class, 'start'])
+        ->name('oauth.pipedrive.start');
+    Route::get('oauth/pipedrive/callback', [PipedriveOAuthController::class, 'callback'])
+        ->name('oauth.pipedrive.callback');
 });
 
 require __DIR__.'/settings.php';

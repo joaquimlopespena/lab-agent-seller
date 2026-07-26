@@ -55,6 +55,15 @@ export type DashboardSummary = {
     conversations_count: number;
 };
 
+export type PipedriveConnectionSummary = {
+    id: number;
+    provider: string;
+    status: StatusSummary;
+    authorized_at: IsoDateTime | null;
+    token_expires_at: IsoDateTime | null;
+    last_error: string | null;
+};
+
 export type ConversationSummary = {
     id: string;
     customer_name: string;

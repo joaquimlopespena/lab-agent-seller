@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Integrations\Pipedrive\PipedriveClient;
+use App\Integrations\Pipedrive\PipedriveOAuthClient;
 use App\Models\AgentConversation;
 use App\Models\AgentConversationMessage;
 use App\Models\CompanyCustomer;
@@ -20,6 +22,7 @@ use App\Models\PipedriveUser;
 use App\Policies\TenantOwnedPolicy;
 use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -34,6 +37,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(TenantContext::class);
+        $this->app->bind(PipedriveClient::class, fn ($app): PipedriveClient => new PipedriveOAuthClient(
+            $app->make(HttpFactory::class),
+            config('services.pipedrive'),
+        ));
     }
 
     /**
