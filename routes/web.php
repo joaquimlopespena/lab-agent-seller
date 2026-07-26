@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\PipedriveConnectionController;
 use App\Http\Controllers\Admin\StartPipedriveSyncController;
+use App\Http\Controllers\Admin\SyncedDataController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PipedriveOAuthController;
 use Illuminate\Support\Facades\Route;
@@ -25,8 +26,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('integrations.index');
         Route::post('integrations/pipedrive/synchronize', StartPipedriveSyncController::class)
             ->name('integrations.pipedrive.synchronize');
-        Route::inertia('synced-data', 'admin/synced-data/index')
+        Route::get('synced-data/{category?}', [SyncedDataController::class, 'index'])
+            ->where('category', '[a-z-]+')
             ->name('synced-data.index');
+        Route::get('synced-data/{category}/{record}', [SyncedDataController::class, 'show'])
+            ->where(['category' => '[a-z-]+', 'record' => '[0-9]+'])
+            ->name('synced-data.show');
         Route::inertia('conversations', 'admin/conversations/index')
             ->name('conversations.index');
     });
