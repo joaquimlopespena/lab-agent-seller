@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Form, Head } from '@inertiajs/react';
 import {
     AlertCircleIcon,
     CheckCircle2Icon,
@@ -8,6 +8,7 @@ import {
     ShieldCheckIcon,
 } from 'lucide-react';
 import { start } from '@/actions/App/Http/Controllers/PipedriveOAuthController';
+import { default as synchronize } from '@/actions/App/Http/Controllers/Admin/StartPipedriveSyncController';
 import { PageContainer } from '@/components/page-container';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -21,7 +22,10 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { index } from '@/routes/admin/integrations';
-import type { PipedriveConnectionSummary } from '@/types';
+import type {
+    CrmSyncRunSummary,
+    PipedriveConnectionSummary,
+} from '@/types';
 
 type ConnectionStatus =
     'disconnected' | 'pending' | 'active' | 'failed' | 'revoked' | 'expired';
@@ -31,6 +35,8 @@ type Props = {
     displayStatus: ConnectionStatus;
     canConnect: boolean;
     canReconnect: boolean;
+    canSynchronize: boolean;
+    syncRuns: CrmSyncRunSummary[];
 };
 
 const statusContent: Record<
@@ -89,11 +95,26 @@ function formatDate(value: string | null): string {
     }).format(new Date(value));
 }
 
+const syncStatusContent: Record<
+    string,
+    {
+        label: string;
+        variant: 'default' | 'secondary' | 'destructive' | 'outline';
+    }
+> = {
+    pending: { label: 'Pendente', variant: 'outline' },
+    running: { label: 'Em andamento', variant: 'secondary' },
+    succeeded: { label: 'Concluída', variant: 'default' },
+    failed: { label: 'Falhou', variant: 'destructive' },
+};
+
 export default function IntegrationsIndex({
     connection,
     displayStatus,
     canConnect,
     canReconnect,
+    canSynchronize,
+    syncRuns,
 }: Props) {
     const status = statusContent[displayStatus];
     const showAction = canConnect || canReconnect;
@@ -178,6 +199,121 @@ export default function IntegrationsIndex({
                         </CardFooter>
                     )}
                 </Card>
+
+                {connection && (
+                    <Card>
+                        <CardHeader className="flex-row items-start justify-between gap-4">
+                            <div className="flex flex-col gap-2">
+                                <CardTitle>Sincronizações</CardTitle>
+                                <CardDescription>
+                                    Histórico das importações manuais do
+                                    Pipedrive.
+                                </CardDescription>
+                            </div>
+                            {canSynchronize && (
+                                <Form {...synchronize.form()}>
+                                    {({ processing }) => (
+                                        <Button
+                                            type="submit"
+                                            disabled={processing}
+                                        >
+                                            <RefreshCwIcon
+                                                className={
+                                                    processing
+                                                        ? 'animate-spin'
+                                                        : undefined
+                                                }
+                                            />
+                                            {syncRuns.some(
+                                                (run) =>
+                                                    run.status.slug ===
+                                                    'failed',
+                                            )
+                                                ? 'Tentar novamente'
+                                                : 'Sincronizar agora'}
+                                        </Button>
+                                    )}
+                                </Form>
+                            )}
+                        </CardHeader>
+                        <CardContent>
+                            {syncRuns.length === 0 ? (
+                                <div className="rounded-lg border border-dashed p-6 text-center text-sm text-muted-foreground">
+                                    Nenhuma sincronização foi executada.
+                                </div>
+                            ) : (
+                                <div className="overflow-x-auto rounded-lg border">
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-muted/50 text-left">
+                                            <tr>
+                                                <th className="px-4 py-3 font-medium">
+                                                    Execução
+                                                </th>
+                                                <th className="px-4 py-3 font-medium">
+                                                    Estado
+                                                </th>
+                                                <th className="px-4 py-3 font-medium">
+                                                    Início
+                                                </th>
+                                                <th className="px-4 py-3 font-medium">
+                                                    Término
+                                                </th>
+                                                <th className="px-4 py-3 font-medium">
+                                                    Resultado
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y">
+                                            {syncRuns.map((run) => {
+                                                const runStatus =
+                                                    syncStatusContent[
+                                                        run.status.slug
+                                                    ] ?? {
+                                                        label: run.status.name,
+                                                        variant:
+                                                            'outline' as const,
+                                                    };
+
+                                                return (
+                                                    <tr key={run.id}>
+                                                        <td className="px-4 py-3 font-medium">
+                                                            #{run.id}
+                                                        </td>
+                                                        <td className="px-4 py-3">
+                                                            <Badge
+                                                                variant={
+                                                                    runStatus.variant
+                                                                }
+                                                            >
+                                                                {
+                                                                    runStatus.label
+                                                                }
+                                                            </Badge>
+                                                        </td>
+                                                        <td className="px-4 py-3 text-muted-foreground">
+                                                            {formatDate(
+                                                                run.started_at,
+                                                            )}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-muted-foreground">
+                                                            {formatDate(
+                                                                run.finished_at,
+                                                            )}
+                                                        </td>
+                                                        <td className="max-w-sm px-4 py-3 text-muted-foreground">
+                                                            {run.error_message ??
+                                                                'Sem erros registrados'}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
             </PageContainer>
         </>
     );

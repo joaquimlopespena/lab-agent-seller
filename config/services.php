@@ -45,9 +45,13 @@ return [
         ))),
         'authorization_endpoint' => env('PIPEDRIVE_AUTHORIZATION_ENDPOINT', 'https://oauth.pipedrive.com/oauth/authorize'),
         'token_endpoint' => env('PIPEDRIVE_TOKEN_ENDPOINT', 'https://oauth.pipedrive.com/oauth/token'),
+        'api_endpoint' => env('PIPEDRIVE_API_ENDPOINT', 'https://api.pipedrive.com/v1'),
         'state_ttl_minutes' => (int) env('PIPEDRIVE_STATE_TTL_MINUTES', 10),
         'timeout_seconds' => (int) env('PIPEDRIVE_TIMEOUT_SECONDS', 10),
         'connect_timeout_seconds' => (int) env('PIPEDRIVE_CONNECT_TIMEOUT_SECONDS', 3),
+        'page_size' => (int) env('PIPEDRIVE_PAGE_SIZE', 100),
+        'sync_attempts' => (int) env('PIPEDRIVE_SYNC_ATTEMPTS', 3),
+        'sync_retry_delay_milliseconds' => (int) env('PIPEDRIVE_SYNC_RETRY_DELAY_MILLISECONDS', 100),
     ],
 
 ];

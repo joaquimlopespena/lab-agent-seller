@@ -1,7 +1,12 @@
 <?php
 
+use App\Models\Company;
+use App\Models\CrmConnection;
+use App\Models\CrmConnectionStatus;
+use App\Models\CrmSyncStatus;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /*
@@ -78,4 +83,33 @@ function foreignColumns(string $table): array
     return collect(Schema::getForeignKeys($table))
         ->mapWithKeys(fn (array $foreign): array => [$foreign['columns'][0] => $foreign['foreign_table']])
         ->all();
+}
+
+function activePipedriveConnection(?Company $company = null): CrmConnection
+{
+    $company ??= Company::factory()->create();
+    $status = CrmConnectionStatus::query()->firstOrCreate(
+        ['slug' => CrmConnectionStatus::Active],
+        ['name' => 'Active', 'is_active' => true],
+    );
+
+    return CrmConnection::factory()->create([
+        'company_id' => $company,
+        'status_id' => $status,
+    ]);
+}
+
+function seedSyncStatuses(): void
+{
+    foreach ([
+        CrmSyncStatus::Pending,
+        CrmSyncStatus::Running,
+        CrmSyncStatus::Succeeded,
+        CrmSyncStatus::Failed,
+    ] as $slug) {
+        CrmSyncStatus::query()->firstOrCreate(
+            ['slug' => $slug],
+            ['name' => Str::headline($slug), 'is_active' => true],
+        );
+    }
 }

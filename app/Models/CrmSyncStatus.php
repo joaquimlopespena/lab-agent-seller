@@ -11,6 +11,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'slug', 'description', 'is_active'])]
 class CrmSyncStatus extends Model
 {
+    public const Failed = 'failed';
+
+    public const Pending = 'pending';
+
+    public const Running = 'running';
+
+    public const Succeeded = 'succeeded';
+
     /** @use HasFactory<CrmSyncStatusFactory> */
     use HasFactory;
 

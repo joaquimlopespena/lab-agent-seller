@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Integrations\Pipedrive\HttpPipedriveDataClient;
 use App\Integrations\Pipedrive\PipedriveClient;
+use App\Integrations\Pipedrive\PipedriveDataClient;
 use App\Integrations\Pipedrive\PipedriveOAuthClient;
 use App\Models\AgentConversation;
 use App\Models\AgentConversationMessage;
@@ -38,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(TenantContext::class);
         $this->app->bind(PipedriveClient::class, fn ($app): PipedriveClient => new PipedriveOAuthClient(
+            $app->make(HttpFactory::class),
+            config('services.pipedrive'),
+        ));
+        $this->app->bind(PipedriveDataClient::class, fn ($app): PipedriveDataClient => new HttpPipedriveDataClient(
             $app->make(HttpFactory::class),
             config('services.pipedrive'),
         ));

@@ -39,6 +39,7 @@ export type CrmSyncRunSummary = {
     status: StatusSummary;
     started_at: IsoDateTime | null;
     finished_at: IsoDateTime | null;
+    error_message: string | null;
     created_at: IsoDateTime;
 };
 
