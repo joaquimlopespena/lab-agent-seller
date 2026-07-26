@@ -62,8 +62,14 @@ const labels: Record<string, string> = {
 };
 
 function display(value: string | number | boolean | null) {
-    if (value === null || value === '') return '—';
-    if (typeof value === 'boolean') return value ? 'Sim' : 'Não';
+    if (value === null || value === '') {
+        return '—';
+    }
+
+    if (typeof value === 'boolean') {
+        return value ? 'Sim' : 'Não';
+    }
+
     return String(value);
 }
 

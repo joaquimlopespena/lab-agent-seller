@@ -7,8 +7,8 @@ import {
     RefreshCwIcon,
     ShieldCheckIcon,
 } from 'lucide-react';
-import { start } from '@/actions/App/Http/Controllers/PipedriveOAuthController';
 import { default as synchronize } from '@/actions/App/Http/Controllers/Admin/StartPipedriveSyncController';
+import { start } from '@/actions/App/Http/Controllers/PipedriveOAuthController';
 import { PageContainer } from '@/components/page-container';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
@@ -22,10 +22,7 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { index } from '@/routes/admin/integrations';
-import type {
-    CrmSyncRunSummary,
-    PipedriveConnectionSummary,
-} from '@/types';
+import type { CrmSyncRunSummary, PipedriveConnectionSummary } from '@/types';
 
 type ConnectionStatus =
     'disconnected' | 'pending' | 'active' | 'failed' | 'revoked' | 'expired';

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ConversationController;
 use App\Http\Controllers\Admin\PipedriveConnectionController;
 use App\Http\Controllers\Admin\StartPipedriveSyncController;
 use App\Http\Controllers\Admin\SyncedDataController;
@@ -61,8 +62,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('synced-data/{category}/{record}', [SyncedDataController::class, 'show'])
             ->where(['category' => '[a-z-]+', 'record' => '[0-9]+'])
             ->name('synced-data.show');
-        Route::inertia('conversations', 'admin/conversations/index')
+        Route::get('conversations', [ConversationController::class, 'index'])
             ->name('conversations.index');
+        Route::get('conversations/{conversation}', [ConversationController::class, 'show'])
+            ->name('conversations.show');
     });
 
     Route::get('oauth/pipedrive', [PipedriveOAuthController::class, 'start'])

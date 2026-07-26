@@ -26,13 +26,26 @@ jobs:
           tools: composer:v2
           coverage: none
 
-      - name: Setup Node
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: '22'
+      - name: Bootstrap Sail
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          sed -i \
+            -e 's/^DB_CONNECTION=.*/DB_CONNECTION=pgsql/' \
+            -e 's/^# DB_HOST=.*/DB_HOST=pgsql/' \
+            -e 's/^# DB_PORT=.*/DB_PORT=5432/' \
+            -e 's/^# DB_DATABASE=.*/DB_DATABASE=laravel/' \
+            -e 's/^# DB_USERNAME=.*/DB_USERNAME=sail/' \
+            -e 's/^# DB_PASSWORD=.*/DB_PASSWORD=password/' \
+            -e 's/^REDIS_HOST=.*/REDIS_HOST=redis/' \
+            .env
+          vendor/bin/sail up -d --wait
+          vendor/bin/sail artisan key:generate --no-interaction
+          vendor/bin/sail npm ci
 
-      - name: Setup Application
-        run: composer setup
+      - name: Run CI Checks via Sail
+        run: vendor/bin/sail composer ci:check
 
-      - name: Run CI Checks
-        run: composer ci:check
+      - name: Stop Sail
+        if: always()
+        run: vendor/bin/sail down -v

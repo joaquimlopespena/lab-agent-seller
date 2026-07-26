@@ -1,5 +1,6 @@
 import { Form, Head } from '@inertiajs/react';
 import { CheckCircle2Icon, LoaderCircleIcon, MailIcon } from 'lucide-react';
+import { store } from '@/actions/App/Http/Controllers/Customer/CustomerMagicLinkController';
 import InputError from '@/components/input-error';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -12,7 +13,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { store } from '@/actions/App/Http/Controllers/Customer/CustomerMagicLinkController';
 
 type CustomerAccessRequestProps = {
     customerAccess?: 'sent' | 'not_associated' | null;
