@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Integrations\Pipedrive\PipedriveClient;
+use App\Integrations\Pipedrive\PipedriveConfigurationException;
 use App\Integrations\Pipedrive\PipedriveOAuthException;
 use App\Integrations\Pipedrive\PipedriveOAuthState;
 use App\Models\CrmConnection;
 use App\Models\CrmConnectionStatus;
+use App\Tenancy\TenantContext;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -17,17 +19,21 @@ final class PipedriveOAuthController extends Controller
         private PipedriveOAuthState $state,
     ) {}
 
-    public function start(Request $request): RedirectResponse
+    public function start(Request $request, TenantContext $tenantContext): RedirectResponse
     {
-        $company = $request->user()->company;
+        $company = $tenantContext->company();
         $state = $this->state->create($request->session(), $company);
 
-        return redirect()->away($this->pipedrive->authorizationUrl($state));
+        try {
+            return redirect()->away($this->pipedrive->authorizationUrl($state));
+        } catch (PipedriveConfigurationException) {
+            return $this->failure('A integração com o Pipedrive ainda não foi configurada.');
+        }
     }
 
-    public function callback(Request $request): RedirectResponse
+    public function callback(Request $request, TenantContext $tenantContext): RedirectResponse
     {
-        $company = $request->user()->company;
+        $company = $tenantContext->company();
         $state = $request->string('state')->toString();
 
         if ($state === '' || ! $this->state->validateAndConsume($request->session(), $company, $state)) {
@@ -50,6 +56,10 @@ final class PipedriveOAuthController extends Controller
 
         try {
             $token = $this->pipedrive->exchangeAuthorizationCode($code);
+        } catch (PipedriveConfigurationException) {
+            $this->markExistingConnectionAsFailed($company->crmConnection, 'Configuração OAuth do Pipedrive indisponível.');
+
+            return $this->failure('A integração com o Pipedrive ainda não foi configurada.');
         } catch (PipedriveOAuthException $exception) {
             $this->markExistingConnectionAsFailed($company->crmConnection, $exception->getMessage());
 

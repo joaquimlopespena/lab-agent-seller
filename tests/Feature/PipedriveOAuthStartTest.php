@@ -25,6 +25,18 @@ it('requires an authenticated administrator to start OAuth', function () {
         ->assertRedirect(route('login'));
 });
 
+it('returns to integrations with a safe error when OAuth is not configured', function () {
+    config()->set('services.pipedrive.client_id', null);
+
+    $this->actingAs(User::factory()->create())
+        ->get(route('oauth.pipedrive.start'))
+        ->assertRedirect(route('admin.integrations.index'))
+        ->assertSessionHas('toast', [
+            'type' => 'error',
+            'message' => 'A integração com o Pipedrive ainda não foi configurada.',
+        ]);
+});
+
 it('redirects with an opaque session and tenant bound state and read only scopes', function () {
     $administrator = User::factory()->create();
 

@@ -8,10 +8,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
-it('fails clearly when required Pipedrive configuration is missing', function () {
+it('fails clearly when a client with missing Pipedrive configuration is used', function () {
     config()->set('services.pipedrive.client_id', null);
 
-    expect(fn () => app(PipedriveClient::class))
+    expect(fn () => app(PipedriveClient::class)->authorizationUrl('state'))
         ->toThrow(PipedriveConfigurationException::class, 'services.pipedrive.client_id');
 });
 

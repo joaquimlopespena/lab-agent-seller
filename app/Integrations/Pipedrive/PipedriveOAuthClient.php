@@ -15,26 +15,12 @@ final class PipedriveOAuthClient implements PipedriveClient
     public function __construct(
         private Factory $http,
         private array $configuration,
-    ) {
-        foreach (['client_id', 'client_secret', 'redirect_uri', 'authorization_endpoint', 'token_endpoint'] as $key) {
-            if (! is_string($this->configuration[$key] ?? null) || trim($this->configuration[$key]) === '') {
-                throw new PipedriveConfigurationException("A configuração services.pipedrive.{$key} é obrigatória.");
-            }
-        }
-
-        if (! is_array($this->configuration['scopes'] ?? null) || $this->configuration['scopes'] === []) {
-            throw new PipedriveConfigurationException('A configuração services.pipedrive.scopes deve conter ao menos um escopo de leitura.');
-        }
-
-        foreach ($this->configuration['scopes'] as $scope) {
-            if (! is_string($scope) || ! str_ends_with($scope, ':read')) {
-                throw new PipedriveConfigurationException('A configuração services.pipedrive.scopes aceita somente escopos terminados em :read.');
-            }
-        }
-    }
+    ) {}
 
     public function authorizationUrl(string $state): string
     {
+        $this->validateConfiguration();
+
         return $this->configuration['authorization_endpoint'].'?'.http_build_query([
             'client_id' => $this->configuration['client_id'],
             'redirect_uri' => $this->configuration['redirect_uri'],
@@ -45,6 +31,8 @@ final class PipedriveOAuthClient implements PipedriveClient
 
     public function exchangeAuthorizationCode(string $code): PipedriveToken
     {
+        $this->validateConfiguration();
+
         try {
             $response = $this->http
                 ->asForm()
@@ -77,5 +65,24 @@ final class PipedriveOAuthClient implements PipedriveClient
             expiresAt: is_numeric($expiresIn) ? new DateTimeImmutable("+{$expiresIn} seconds") : null,
             externalCompanyId: is_scalar($externalCompanyId) ? (string) $externalCompanyId : null,
         );
+    }
+
+    private function validateConfiguration(): void
+    {
+        foreach (['client_id', 'client_secret', 'redirect_uri', 'authorization_endpoint', 'token_endpoint'] as $key) {
+            if (! is_string($this->configuration[$key] ?? null) || trim($this->configuration[$key]) === '') {
+                throw new PipedriveConfigurationException("A configuração services.pipedrive.{$key} é obrigatória.");
+            }
+        }
+
+        if (! is_array($this->configuration['scopes'] ?? null) || $this->configuration['scopes'] === []) {
+            throw new PipedriveConfigurationException('A configuração services.pipedrive.scopes deve conter ao menos um escopo de leitura.');
+        }
+
+        foreach ($this->configuration['scopes'] as $scope) {
+            if (! is_string($scope) || ! str_ends_with($scope, ':read')) {
+                throw new PipedriveConfigurationException('A configuração services.pipedrive.scopes aceita somente escopos terminados em :read.');
+            }
+        }
     }
 }
