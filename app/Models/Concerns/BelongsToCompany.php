@@ -3,9 +3,11 @@
 namespace App\Models\Concerns;
 
 use App\Models\Company;
+use App\Tenancy\TenantContext;
 use DomainException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 trait BelongsToCompany
 {
@@ -41,6 +43,22 @@ trait BelongsToCompany
             $this->qualifyColumn('company_id'),
             $company instanceof Company ? $company->getKey() : $company,
         );
+    }
+
+    /**
+     * @param  Model|Builder<static>|Relation<*, *, *>  $query
+     * @return Builder<static>
+     */
+    public function resolveRouteBindingQuery($query, $value, $field = null): Builder
+    {
+        $tenantContext = app(TenantContext::class);
+
+        if ($tenantContext->current() === null && request()->user() !== null) {
+            $tenantContext->setForUser(request()->user());
+        }
+
+        return parent::resolveRouteBindingQuery($query, $value, $field)
+            ->where($this->qualifyColumn('company_id'), $tenantContext->id());
     }
 
     /**

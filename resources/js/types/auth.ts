@@ -11,6 +11,7 @@ export type User = {
 
 export type Auth = {
     user: User;
+    company: CompanySummary | null;
 };
 
 /* @chisel-passkeys */
@@ -22,3 +23,4 @@ export type Passkey = {
     last_used_at_diff: string | null;
 };
 /* @end-chisel-passkeys */
+import type { CompanySummary } from './domain';

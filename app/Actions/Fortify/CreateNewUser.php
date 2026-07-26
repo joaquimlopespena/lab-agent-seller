@@ -22,13 +22,14 @@ class CreateNewUser implements CreatesNewUsers
     public function create(array $input): User
     {
         Validator::make($input, [
+            'company_name' => ['required', 'string', 'max:255'],
             ...$this->profileRules(),
             'password' => $this->passwordRules(),
         ])->validate();
 
         return DB::transaction(function () use ($input): User {
             $company = Company::create([
-                'name' => $input['company_name'] ?? $input['name'],
+                'name' => $input['company_name'],
             ]);
 
             return User::create([

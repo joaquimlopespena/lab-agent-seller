@@ -2,11 +2,14 @@
 
 namespace App\Http\Middleware;
 
+use App\Tenancy\TenantContext;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
+    public function __construct(private TenantContext $tenantContext) {}
+
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -40,6 +43,12 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'auth' => [
                 'user' => $request->user(),
+                'company' => fn (): ?array => $this->tenantContext->current() === null
+                    ? null
+                    : [
+                        'id' => $this->tenantContext->id(),
+                        'name' => $this->tenantContext->company()->name,
+                    ],
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

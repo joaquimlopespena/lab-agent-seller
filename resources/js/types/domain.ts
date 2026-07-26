@@ -42,6 +42,19 @@ export type CrmSyncRunSummary = {
     created_at: IsoDateTime;
 };
 
+export type DashboardSummary = {
+    crm_connection: {
+        id: number;
+        provider: string;
+        authorized_at: IsoDateTime | null;
+        status: StatusSummary;
+    } | null;
+    sync_runs_count: number;
+    synced_records_count: number;
+    customers_count: number;
+    conversations_count: number;
+};
+
 export type ConversationSummary = {
     id: string;
     customer_name: string;
