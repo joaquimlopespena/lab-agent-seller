@@ -38,4 +38,9 @@ class CustomerSession extends Model
     {
         return $this->belongsTo(Company::class, 'active_company_id');
     }
+
+    public function isValid(): bool
+    {
+        return $this->revoked_at === null && $this->expires_at->isFuture();
+    }
 }

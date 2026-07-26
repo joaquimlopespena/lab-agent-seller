@@ -3,6 +3,10 @@
 use App\Http\Controllers\Admin\PipedriveConnectionController;
 use App\Http\Controllers\Admin\StartPipedriveSyncController;
 use App\Http\Controllers\Admin\SyncedDataController;
+use App\Http\Controllers\Customer\ConsumeCustomerMagicLinkController;
+use App\Http\Controllers\Customer\CustomerAccessConfirmationController;
+use App\Http\Controllers\Customer\CustomerMagicLinkController;
+use App\Http\Controllers\Customer\EndCustomerSessionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PipedriveOAuthController;
 use Illuminate\Support\Facades\Route;
@@ -10,12 +14,25 @@ use Illuminate\Support\Facades\Route;
 Route::inertia('/', 'welcome')->name('home');
 
 Route::prefix('customer')->name('customer.')->group(function () {
-    Route::inertia('access', 'customer/access/request')
+    Route::get('access', [CustomerMagicLinkController::class, 'create'])
         ->name('access.request');
-    Route::inertia('companies', 'customer/companies/index')
-        ->name('companies.index');
-    Route::inertia('chat', 'customer/chat/index')
-        ->name('chat.index');
+    Route::post('access', [CustomerMagicLinkController::class, 'store'])
+        ->middleware('throttle:6,1')
+        ->name('access.store');
+    Route::get('access/confirmation', CustomerAccessConfirmationController::class)
+        ->middleware('customer.auth')
+        ->name('access.confirmation');
+    Route::get('access/{token}', ConsumeCustomerMagicLinkController::class)
+        ->where('token', '[A-Za-z0-9]{64}')
+        ->name('access.consume');
+    Route::middleware('customer.auth')->group(function () {
+        Route::delete('session', EndCustomerSessionController::class)
+            ->name('session.destroy');
+        Route::inertia('companies', 'customer/companies/index')
+            ->name('companies.index');
+        Route::inertia('chat', 'customer/chat/index')
+            ->name('chat.index');
+    });
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {

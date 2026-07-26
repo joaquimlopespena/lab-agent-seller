@@ -1,12 +1,26 @@
 <?php
 
+use App\Models\CustomerSession;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
+
+uses(RefreshDatabase::class);
 
 it('renders each customer shell destination without administrative authentication', function (
     string $routeName,
     string $component,
 ) {
-    $this->get(route($routeName))
+    $request = $this;
+
+    if ($routeName !== 'customer.access.request') {
+        $token = str()->random(64);
+        CustomerSession::factory()->create([
+            'token_hash' => hash('sha256', $token),
+        ]);
+        $request = $this->withCookie('customer_session', $token);
+    }
+
+    $request->get(route($routeName))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component($component)

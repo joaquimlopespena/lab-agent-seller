@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\CustomerAuth\CustomerAuthConfiguration;
+use App\CustomerAuth\CustomerMagicLinkSender;
+use App\CustomerAuth\LaravelNotificationMagicLinkSender;
 use App\Integrations\Pipedrive\HttpPipedriveDataClient;
 use App\Integrations\Pipedrive\PipedriveClient;
 use App\Integrations\Pipedrive\PipedriveDataClient;
@@ -11,6 +14,7 @@ use App\Models\AgentConversationMessage;
 use App\Models\CompanyCustomer;
 use App\Models\CrmConnection;
 use App\Models\CrmSyncRun;
+use App\Models\CustomerSession;
 use App\Models\PipedriveActivity;
 use App\Models\PipedriveCustomField;
 use App\Models\PipedriveDeal;
@@ -25,6 +29,7 @@ use App\Policies\TenantOwnedPolicy;
 use App\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Client\Factory as HttpFactory;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -39,6 +44,11 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(TenantContext::class);
+        $this->app->singleton(
+            CustomerAuthConfiguration::class,
+            fn (): CustomerAuthConfiguration => new CustomerAuthConfiguration(config('customer_auth')),
+        );
+        $this->app->bind(CustomerMagicLinkSender::class, LaravelNotificationMagicLinkSender::class);
         $this->app->bind(PipedriveClient::class, fn ($app): PipedriveClient => new PipedriveOAuthClient(
             $app->make(HttpFactory::class),
             config('services.pipedrive'),
@@ -54,6 +64,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Auth::viaRequest('customer-session', function ($request) {
+            $configuration = app(CustomerAuthConfiguration::class);
+            $token = $request->cookie($configuration->cookieName);
+
+            if (! is_string($token) || $token === '') {
+                return null;
+            }
+
+            $session = CustomerSession::query()
+                ->with('customerIdentity')
+                ->where('token_hash', hash('sha256', $token))
+                ->first();
+
+            if ($session === null || ! $session->isValid()) {
+                return null;
+            }
+
+            $session->update(['last_activity_at' => now()]);
+            $request->attributes->set('customerSession', $session);
+
+            return $session->customerIdentity;
+        });
+
         $this->registerTenantPolicies();
         $this->configureDefaults();
     }
