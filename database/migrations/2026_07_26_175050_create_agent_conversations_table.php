@@ -16,17 +16,24 @@ return new class extends AiMigration
 
         Schema::create($conversationsTable, function (Blueprint $table) {
             $table->string('id', 36)->primary();
+            $table->foreignId('company_id')->constrained()->restrictOnDelete();
+            $table->foreignId('company_customer_id')->constrained()->restrictOnDelete();
+            $table->foreignId('status_id')->constrained('conversation_statuses')->restrictOnDelete();
             $table->string('participant_type')->nullable();
             $table->unsignedBigInteger('participant_id')->nullable();
             $table->string('title');
             $table->timestamps();
 
             $table->index(['participant_type', 'participant_id', 'updated_at'], 'participant_updated_at_index');
+            $table->unique(['company_id', 'company_customer_id']);
         });
 
-        Schema::create($messagesTable, function (Blueprint $table) {
+        Schema::create($messagesTable, function (Blueprint $table) use ($conversationsTable) {
             $table->string('id', 36)->primary();
             $table->string('conversation_id', 36)->index();
+            $table->foreign('conversation_id')->references('id')->on($conversationsTable)->restrictOnDelete();
+            $table->foreignId('company_id')->constrained()->restrictOnDelete();
+            $table->foreignId('message_role_id')->constrained('message_roles')->restrictOnDelete();
             $table->string('participant_type')->nullable();
             $table->unsignedBigInteger('participant_id')->nullable();
             $table->string('agent');
@@ -42,6 +49,7 @@ return new class extends AiMigration
 
             $table->index(['conversation_id', 'participant_type', 'participant_id', 'updated_at'], 'conversation_index');
             $table->index(['participant_type', 'participant_id'], 'participant_index');
+            $table->index(['company_id', 'conversation_id']);
         });
     }
 

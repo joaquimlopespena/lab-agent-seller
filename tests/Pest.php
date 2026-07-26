@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 /*
@@ -47,4 +48,34 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+function column(string $table, string $column): array
+{
+    return collect(Schema::getColumns($table))
+        ->firstWhere('name', $column);
+}
+
+function indexColumns(string $table): array
+{
+    return collect(Schema::getIndexes($table))
+        ->map(fn (array $index): array => $index['columns'])
+        ->values()
+        ->all();
+}
+
+function uniqueIndexColumns(string $table): array
+{
+    return collect(Schema::getIndexes($table))
+        ->where('unique', true)
+        ->map(fn (array $index): array => $index['columns'])
+        ->values()
+        ->all();
+}
+
+function foreignColumns(string $table): array
+{
+    return collect(Schema::getForeignKeys($table))
+        ->mapWithKeys(fn (array $foreign): array => [$foreign['columns'][0] => $foreign['foreign_table']])
+        ->all();
 }
