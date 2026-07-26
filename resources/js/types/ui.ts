@@ -19,3 +19,9 @@ export type AuthLayoutProps = {
     title?: string;
     description?: string;
 };
+
+export type CustomerLayoutProps = {
+    children?: ReactNode;
+    title?: string;
+    description?: string;
+};
