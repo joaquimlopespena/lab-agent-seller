@@ -10,7 +10,10 @@ use Illuminate\Support\Str;
 
 final class ConsumeCustomerMagicLink
 {
-    public function __construct(private CustomerAuthConfiguration $configuration) {}
+    public function __construct(
+        private CustomerAuthConfiguration $configuration,
+        private CustomerCompanyResolver $customerCompanyResolver,
+    ) {}
 
     public function handle(string $token, Request $request): MagicLinkConsumption
     {
@@ -45,6 +48,10 @@ final class ConsumeCustomerMagicLink
                 'last_activity_at' => $now,
             ]);
 
+            $this->customerCompanyResolver->automaticallySelectOnlyCompany(
+                $session,
+                $magicLink->customerIdentity,
+            );
             $magicLink->update(['used_at' => $now]);
 
             return MagicLinkConsumption::succeeded($session, $sessionToken);

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\StartPipedriveSyncController;
 use App\Http\Controllers\Admin\SyncedDataController;
 use App\Http\Controllers\Customer\ConsumeCustomerMagicLinkController;
 use App\Http\Controllers\Customer\CustomerAccessConfirmationController;
+use App\Http\Controllers\Customer\CustomerCompanyController;
 use App\Http\Controllers\Customer\CustomerMagicLinkController;
 use App\Http\Controllers\Customer\EndCustomerSessionController;
 use App\Http\Controllers\DashboardController;
@@ -28,10 +29,14 @@ Route::prefix('customer')->name('customer.')->group(function () {
     Route::middleware('customer.auth')->group(function () {
         Route::delete('session', EndCustomerSessionController::class)
             ->name('session.destroy');
-        Route::inertia('companies', 'customer/companies/index')
+        Route::get('companies', [CustomerCompanyController::class, 'index'])
             ->name('companies.index');
-        Route::inertia('chat', 'customer/chat/index')
-            ->name('chat.index');
+        Route::post('companies', [CustomerCompanyController::class, 'store'])
+            ->name('companies.store');
+        Route::middleware('customer.tenant')->group(function () {
+            Route::inertia('chat', 'customer/chat/index')
+                ->name('chat.index');
+        });
     });
 });
 

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CompanyCustomer;
 use App\Models\CustomerSession;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -14,9 +15,19 @@ it('renders each customer shell destination without administrative authenticatio
 
     if ($routeName !== 'customer.access.request') {
         $token = str()->random(64);
-        CustomerSession::factory()->create([
+        $customerSession = CustomerSession::factory()->create([
             'token_hash' => hash('sha256', $token),
         ]);
+
+        if ($routeName === 'customer.chat.index') {
+            $companyCustomer = CompanyCustomer::factory()
+                ->for($customerSession->customerIdentity, 'customerIdentity')
+                ->create();
+            $customerSession->update([
+                'active_company_id' => $companyCustomer->company_id,
+            ]);
+        }
+
         $request = $this->withCookie('customer_session', $token);
     }
 
@@ -25,7 +36,11 @@ it('renders each customer shell destination without administrative authenticatio
         ->assertInertia(fn (Assert $page) => $page
             ->component($component)
             ->missing('company')
-            ->missing('companies')
+            ->when(
+                $routeName === 'customer.companies.index',
+                fn (Assert $page) => $page->where('companies', []),
+                fn (Assert $page) => $page->missing('companies'),
+            )
             ->missing('conversation')
             ->missing('messages')
             ->missing('token')
