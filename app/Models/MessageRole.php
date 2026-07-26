@@ -11,6 +11,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'slug', 'description', 'is_active'])]
 class MessageRole extends Model
 {
+    public const User = 'user';
+
+    public const Assistant = 'assistant';
+
+    public const System = 'system';
+
     /** @use HasFactory<MessageRoleFactory> */
     use HasFactory;
 

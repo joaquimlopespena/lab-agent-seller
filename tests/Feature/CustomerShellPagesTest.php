@@ -41,8 +41,16 @@ it('renders each customer shell destination without administrative authenticatio
                 fn (Assert $page) => $page->where('companies', []),
                 fn (Assert $page) => $page->missing('companies'),
             )
-            ->missing('conversation')
-            ->missing('messages')
+            ->when(
+                $routeName === 'customer.chat.index',
+                fn (Assert $page) => $page
+                    ->has('conversation.id')
+                    ->has('conversation.title')
+                    ->where('messages', []),
+                fn (Assert $page) => $page
+                    ->missing('conversation')
+                    ->missing('messages'),
+            )
             ->missing('token')
             ->missing('hash')
             ->missing('raw_payload'));

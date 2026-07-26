@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 #[Fillable(['name', 'slug', 'description', 'is_active'])]
 class ConversationStatus extends Model
 {
+    public const Active = 'active';
+
     /** @use HasFactory<ConversationStatusFactory> */
     use HasFactory;
 

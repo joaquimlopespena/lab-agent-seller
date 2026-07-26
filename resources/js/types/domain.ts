@@ -83,3 +83,8 @@ export type ConversationMessage = {
     content: string;
     created_at: IsoDateTime;
 };
+
+export type CustomerConversation = {
+    id: string;
+    title: string;
+};

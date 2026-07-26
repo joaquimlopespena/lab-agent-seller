@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Ai\Contracts\GeneratesAgentReplies;
+use App\Ai\LaravelAiReplyGenerator;
 use App\CustomerAuth\CustomerAuthConfiguration;
 use App\CustomerAuth\CustomerMagicLinkSender;
 use App\CustomerAuth\LaravelNotificationMagicLinkSender;
@@ -49,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
             fn (): CustomerAuthConfiguration => new CustomerAuthConfiguration(config('customer_auth')),
         );
         $this->app->bind(CustomerMagicLinkSender::class, LaravelNotificationMagicLinkSender::class);
+        $this->app->bind(GeneratesAgentReplies::class, LaravelAiReplyGenerator::class);
         $this->app->bind(PipedriveClient::class, fn ($app): PipedriveClient => new PipedriveOAuthClient(
             $app->make(HttpFactory::class),
             config('services.pipedrive'),

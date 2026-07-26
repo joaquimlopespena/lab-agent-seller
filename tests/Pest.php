@@ -1,9 +1,11 @@
 <?php
 
 use App\Models\Company;
+use App\Models\CompanyCustomer;
 use App\Models\CrmConnection;
 use App\Models\CrmConnectionStatus;
 use App\Models\CrmSyncStatus;
+use App\Models\CustomerSession;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -112,4 +114,21 @@ function seedSyncStatuses(): void
             ['name' => Str::headline($slug), 'is_active' => true],
         );
     }
+}
+
+/**
+ * @return array{0: CompanyCustomer, 1: CustomerSession, 2: string}
+ */
+function activeCustomerSession(?CompanyCustomer $companyCustomer = null): array
+{
+    $companyCustomer ??= CompanyCustomer::factory()->create();
+    $token = Str::random(64);
+    $customerSession = CustomerSession::factory()
+        ->for($companyCustomer->customerIdentity, 'customerIdentity')
+        ->create([
+            'active_company_id' => $companyCustomer->company_id,
+            'token_hash' => hash('sha256', $token),
+        ]);
+
+    return [$companyCustomer, $customerSession, $token];
 }

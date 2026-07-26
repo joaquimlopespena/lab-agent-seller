@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\SyncedDataController;
 use App\Http\Controllers\Customer\ConsumeCustomerMagicLinkController;
 use App\Http\Controllers\Customer\CustomerAccessConfirmationController;
 use App\Http\Controllers\Customer\CustomerCompanyController;
+use App\Http\Controllers\Customer\CustomerConversationController;
 use App\Http\Controllers\Customer\CustomerMagicLinkController;
 use App\Http\Controllers\Customer\EndCustomerSessionController;
 use App\Http\Controllers\DashboardController;
@@ -34,8 +35,14 @@ Route::prefix('customer')->name('customer.')->group(function () {
         Route::post('companies', [CustomerCompanyController::class, 'store'])
             ->name('companies.store');
         Route::middleware('customer.tenant')->group(function () {
-            Route::inertia('chat', 'customer/chat/index')
+            Route::get('chat', [CustomerConversationController::class, 'index'])
                 ->name('chat.index');
+            Route::post('chat/messages', [CustomerConversationController::class, 'store'])
+                ->middleware('throttle:30,1')
+                ->name('chat.messages.store');
+            Route::post('chat/messages/{message}/retry', [CustomerConversationController::class, 'retry'])
+                ->middleware('throttle:30,1')
+                ->name('chat.messages.retry');
         });
     });
 });
